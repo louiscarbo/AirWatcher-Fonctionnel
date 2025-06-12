@@ -29,6 +29,8 @@ class Attribute {
         // Contrat :
         //
 
+        string getAttributeID() const;
+
         //------------------------------------------------- Surcharge d'opérateurs
 
         //-------------------------------------------- Constructeurs - destructeur

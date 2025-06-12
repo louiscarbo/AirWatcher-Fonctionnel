@@ -12,7 +12,7 @@ int main() {
     manager.loadData(true); // Ou une méthode similaire ?
 
     // Exécuter les tests
-    runTests();
+    // runTests();
     
     // Initialiser le menu avec le manager
     Menu menu(manager);

@@ -221,7 +221,7 @@ void Menu::identifyMalfunctioningSensors()
         return;
     }
 
-    std::cout << "Sensor ID     | Suspicion Score\n";
+    std::cout << "\nSensor ID     | Suspicion Score\n";
     std::cout << "--------------+----------------\n";
     for (auto &p : scored) {
         const Sensor &s = p.first;

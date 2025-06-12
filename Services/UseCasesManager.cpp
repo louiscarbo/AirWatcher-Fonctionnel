@@ -17,7 +17,7 @@
 using namespace std;
 
 //------------------------------------------------------ Include personnel
-#include "../Services/useCasesManager.h"
+#include "../Services/UseCasesManager.h"
 #include "../Data/CSVParser.h"
 
 
@@ -27,102 +27,125 @@ using namespace std;
 
 //----------------------------------------------------- Méthodes publiques
 vector<pair<Sensor, double>> UseCasesManager::identifySuspiciousSensors()
-// Algorithme :
-//  Voir le document de conception pour les détails de l'algorithme.
 {
-    const int LAST_N = 30;                   // number of most recent readings to consider
-    const int RANGE_MIN = 1;                 // ATMO lower bound
-    const int RANGE_MAX = 10;                // ATMO upper bound
-    const double NEIGHBOR_RADIUS_KM = 5.0;   // km
-    const double LOCAL_DIFF_THRESHOLD = 2.0; // ATMO points
+    const int LAST_N = 30;                   
+    const int RANGE_MIN = 0;                 
+    const int RANGE_MAX = 100;                
+    const double NEIGHBOR_RADIUS_KM = 0.8;   
+    const double LOCAL_DIFF_THRESHOLD = 2.0; 
+    const double SPIKE_THRESHOLD = 2.0;
 
-    // How many times the average daily change counts as a "spike"
-    const double K_SPIKE_MULTIPLIER = 2.0; 
-
-    // Weights for different checks
-    const double WEIGHT_RANGE_VIOLATION = 2.0;
+    const double WEIGHT_RANGE_VIOLATION = 1000.0;
     const double WEIGHT_SPIKE_DETECTION = 1.5;
     const double WEIGHT_LOCAL_INCONSISTENCY = 2.0;
-
+    
     const double MAX_SCORE = 10.0;
 
-    // Initialize the list to hold the suspicious sensor scores
     vector<pair<Sensor, double>> scoredSensors;
     vector<Sensor> allSensors = sensors;
 
+    cout << "Identifying suspicious sensors..." << endl;
+
+    // OPTIMIZATION 1: Pre-compute all neighbors for all sensors
+    unordered_map<string, vector<string>> neighborMap;
+    for (int i = 0; i < allSensors.size(); i++) {
+        for (int j = 0; j < allSensors.size(); j++) {
+            if (i != j) {
+                const Coordinates* coord1 = allSensors[i].getCoordinates();
+                const Coordinates* coord2 = allSensors[j].getCoordinates();
+                
+                double distance = Coordinates::distance(*coord1, *coord2);
+                
+                if (distance <= NEIGHBOR_RADIUS_KM) {
+                    neighborMap[allSensors[i].getSensorID()].push_back(allSensors[j].getSensorID());
+                }
+            }
+        }
+    }
+
+    // OPTIMIZATION 2: Create sensor lookup map
+    unordered_map<string, Sensor*> sensorLookup;
     for (auto& sensor : allSensors) {
-        // Retrieve recent ATMO readings to compute the suspicion score
+        sensorLookup[sensor.getSensorID()] = &sensor;
+    }
+
+    int currentSensor = 0;
+    for (auto& sensor : allSensors) {
+        currentSensor++;
+        cout << "\rProgress: " << sensor.getSensorID() << " " << currentSensor << "/" << allSensors.size() 
+             << " (" << (currentSensor * 100 / allSensors.size()) << "%)" << flush;
+
         vector<Timestamp> times = sensor.getMeasurementTimestamps();
         
-        // Sort times in descending order and take only LAST_N elements
-        sort(times.begin(), times.end(), greater<Timestamp>());
-        if (times.size() > LAST_N) {
-            times.resize(LAST_N);
-        }
-        
-        // Map each timestamp to its corresponding ATMO index
+        // OPTIMIZATION 3: Cache ATMO calculations
+        unordered_map<string, double> atmoCache;
         vector<double> recentAtmo;
+        
         for (auto& t : times) {
-            recentAtmo.push_back(sensor.calculateMeanAtmoIndex(t));
+            string timeKey = to_string(chrono::duration_cast<chrono::seconds>(t.time_since_epoch()).count());
+            double atmo = sensor.calculateMeanAtmoIndex(t);
+            atmoCache[timeKey] = atmo;
+            recentAtmo.push_back(atmo);
         }
 
         int N = recentAtmo.size();
         double score;
 
         if (N == 0) {
-            cout << "No recent data available for sensor: " << sensor.getSensorID() << endl;
-            // No recent data available, set maximum suspicion score
             score = MAX_SCORE;
         } else {
-            // CHECK 1 - Out of range values
+            // CHECK 1 - Out of range measurement values
             int violations = 0;
-            for (auto& atmo : recentAtmo) {
-                if (atmo < RANGE_MIN || atmo > RANGE_MAX) {
-                    violations++;
+            int totalMeasurements = 0;
+            
+            for (const auto& time : times) {
+                for (const auto& measurement : measurements) {
+                    if (measurement.getSensorID() == sensor.getSensorID() && 
+                        measurement.getTimeStamp() == time) {
+                        
+                        double value = measurement.getValue();
+                        totalMeasurements++;
+                        if (value < RANGE_MIN || value > RANGE_MAX) {
+                            violations++;
+                        }
+                    }
                 }
             }
-            double rateRange = static_cast<double>(violations) / N;
+            
+            double rateRange = totalMeasurements > 0 ? static_cast<double>(violations) / totalMeasurements : 0.0;
 
             // CHECK 2 - Spikes
-            // a) Compute average daily change in ATMO value
             vector<double> changes;
             double prevAtmo = -1;
             
             for (auto& currentAtmo : recentAtmo) {
-                if (prevAtmo >= 0) {  // Check if prevAtmo is valid
+                if (prevAtmo >= 0) {
                     changes.push_back(abs(currentAtmo - prevAtmo));
                 }
                 prevAtmo = currentAtmo;
             }
-            
-            double avgChange = 0.0;
-            if (!changes.empty()) {
-                avgChange = accumulate(changes.begin(), changes.end(), 0.0) / changes.size();
-            }
-            
-            double spikeThreshold = K_SPIKE_MULTIPLIER * avgChange;
-            
-            // b) Rate of spikes
+
             int spikes = 0;
             for (auto& change : changes) {
-                if (change > spikeThreshold) {
+                if (change > SPIKE_THRESHOLD) {
                     spikes++;
                 }
             }
-            
             double rateSpike = static_cast<double>(spikes) / max(1, (int)changes.size());
 
-            // CHECK 3 - Local inconsistency (comparison with neighbors)
+            // CHECK 3 - OPTIMIZED Local inconsistency
             vector<double> deviations;
+            const vector<string>& neighborIds = neighborMap[sensor.getSensorID()];
             
-            for (auto& time : times) {
-                double selfValue = sensor.calculateMeanAtmoIndex(time);
-                vector<Sensor> neighbors = findSensorsWithinRadius(*sensor.getCoordinates(), NEIGHBOR_RADIUS_KM);
-
+            for (int i = 0; i < times.size(); i++) {
+                const auto& time = times[i];
+                double selfValue = recentAtmo[i];
+                
                 vector<double> neighborValues;
-                for (auto& neighbor : neighbors) {
-                    if (neighbor.hasMeasurementAtTime(time)) {
-                        neighborValues.push_back(neighbor.calculateMeanAtmoIndex(time));
+                for (const string& neighborId : neighborIds) {
+                    Sensor* neighbor = sensorLookup[neighborId];
+                    if (neighbor->hasMeasurementAtTime(time)) {
+                        neighborValues.push_back(neighbor->calculateMeanAtmoIndex(time));
                     }
                 }
 
@@ -136,23 +159,33 @@ vector<pair<Sensor, double>> UseCasesManager::identifySuspiciousSensors()
             if (!deviations.empty()) {
                 double meanDev = accumulate(deviations.begin(), deviations.end(), 0.0) / deviations.size();
                 double diffNorm = meanDev / LOCAL_DIFF_THRESHOLD;
-                // Clamp inconsistency between 0 and 1
                 inconsistency = min(max(diffNorm, 0.0), 1.0);
             }
 
-            // Calculate final suspicion score
             double rawScore = WEIGHT_RANGE_VIOLATION * rateRange +
                             WEIGHT_SPIKE_DETECTION * rateSpike +
                             WEIGHT_LOCAL_INCONSISTENCY * inconsistency;
             
+            // DEBUG
+            // cout << "\nSensor ID: " << sensor.getSensorID() 
+            //      << ", Range Violations: " << violations 
+            //      << ", Spikes: " << spikes 
+            //      << ", Local Inconsistency: " << inconsistency 
+            //      << ", Raw Score: " << rawScore;
+            // cout << "\nScore Details:"
+            //      << " (Range: " << rateRange 
+            //      << ", Spikes: " << rateSpike 
+            //      << ", Inconsistency: " << inconsistency << ")" << endl;
+            // END DEBUG
+            
             score = min(rawScore, MAX_SCORE);
         }
 
-        // Add the sensor and its suspicion score to the result list
         scoredSensors.push_back(make_pair(sensor, score));
     }
 
-    // Sort by suspicion score (descending)
+    cout << endl;
+    
     sort(scoredSensors.begin(), scoredSensors.end(), 
          [](const pair<Sensor, double>& a, const pair<Sensor, double>& b) {
              return a.second > b.second;
@@ -236,6 +269,7 @@ void UseCasesManager::loadData(bool verbose) {
         cout << "Terminé : " << measurements.size() << " mesures chargées\n";
     }
 
+    // Association des mesures aux capteurs
     if (verbose) {
         cout << "Association des mesures aux capteurs... ";
     }
@@ -276,7 +310,7 @@ void UseCasesManager::loadData(bool verbose) {
     }
 
     if (verbose) {
-        cout << "Chargement des données terminé." << endl;
+        cout << "Chargement des données terminé.\n" << endl;
     }}
 
 //------------------------------------------------- Surcharge d'opérateurs

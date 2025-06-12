@@ -35,6 +35,8 @@ class Measurement {
         // Contrat :
         //
 
+        string getSensorID() const;
+
         Attribute getAttribute() const;
         // Mode d'emploi :
         // Retourne l'attribut associé à la mesure.

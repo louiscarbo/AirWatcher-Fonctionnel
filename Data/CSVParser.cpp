@@ -97,6 +97,9 @@ vector<Measurement> CSVParser::loadMeasurements (){
         return mesures;   
     }
 
+    // Charger les attributs une seule fois
+    vector<Attribute> attributes = loadAttributes();
+
     string line;
 
     while (getline(file,line)){
@@ -105,11 +108,21 @@ vector<Measurement> CSVParser::loadMeasurements (){
 
         if (cols.size() <4) continue; //4 car 4 colonnes
 
+        // Trouver l'attribut correspondant à cols[2]
+        Attribute foundAttribute("", "", ""); // Attribut par défaut
+        
+        for (const auto& attribute : attributes) {
+            if (attribute.getAttributeID() == cols[2]) {
+                foundAttribute = attribute;
+                break;
+            }
+        }
+
         mesures.emplace_back(
-            parseTimestamp(cols[0]),  //                          !!!!!! A REVOIR !!!!!! 
+            parseTimestamp(cols[0]),
             stof(cols[3]),
             cols[1],
-            Attribute{cols[2],"",""}
+            foundAttribute
         );
     }
     return mesures; 

@@ -35,6 +35,10 @@ Timestamp Measurement::getTimeStamp() const {
     return timestamp;
 }
 
+string Measurement::getSensorID() const {
+    return sensorID;
+}
+
 //------------------------------------------------- Surcharge d'opérateurs
 
 //-------------------------------------------- Constructeurs - destructeur

@@ -16,48 +16,71 @@ const Coordinates * Sensor::getCoordinates() const
     return &coordinates;
 }
 
-int Sensor::calculateMeanAtmoIndex(Timestamp timeStamp = std::chrono::system_clock::now())
-{ // à vérifier
-    int atmo_final = 0;
-    auto it = measurements.begin();
-    map<int, int> dictMaxValAtmo;
-    for (int i = 0; i < measurements.size(); i += 4)
-    {
-        advance(it, i);
-        if (it->getTimeStamp() == timeStamp)
-        {
-            for (int j = 0; j < 4; ++j)
-            { // Attention : possible que si les mesures ordonnées comme dans le csv
-                advance(it, i + j);
-                dictMaxValAtmo = dictUnitAtmoMaxValue[it->getAttribute().getUnit()];
-                for (int atmo = 1; atmo <= 10; ++atmo)
-                {
-                    if (dictMaxValAtmo[atmo] >= ((int)it->getValue()) && atmo > 1)
-                    {
-                        atmo_final = max(atmo_final, atmo);
-                        break;
-                    }
+int Sensor::calculateMeanAtmoIndex(Timestamp timeStamp)
+{
+    // Recherche toutes les mesures pour ce timestamp
+    vector<Measurement> measurementsAtTime;
+    
+    for (const auto& measurement : measurements) {
+        if (measurement.getTimeStamp() == timeStamp) {
+            measurementsAtTime.push_back(measurement);
+        }
+    }
+    
+    // Si aucune mesure à ce timestamp, retourner 0
+    if (measurementsAtTime.empty()) {
+        return 0;
+    }
+        
+    // Calculer le sous-indice pour chaque polluant
+    map<string, int> subIndices;
+    
+    for (const auto& measurement : measurementsAtTime) {
+        string unit = measurement.getAttribute().getAttributeID();
+        float value = measurement.getValue();
+        
+        // Vérifier si on a les seuils pour ce polluant
+        if (dictUnitAtmoMaxValue.find(unit) == dictUnitAtmoMaxValue.end()) {
+            cout << "No thresholds defined for pollutant: " << unit << endl;
+            continue;
+        }
+        
+        // Calculer le sous-indice pour ce polluant
+        int subIndex = 10; // Commencer par le maximum au cas où la valeur dépasse tous les seuils
+        const map<int, int>& thresholds = dictUnitAtmoMaxValue.at(unit);
+        
+        for (int atmo = 1; atmo <= 10; ++atmo) {
+            if (thresholds.find(atmo) != thresholds.end()) {
+                if (value <= thresholds.at(atmo)) {
+                    subIndex = atmo;
+                    break;
                 }
             }
         }
+                
+        // Prendre le maximum si on a plusieurs mesures du même polluant
+        if (subIndices.find(unit) == subIndices.end() || subIndex > subIndices[unit]) {
+            subIndices[unit] = subIndex;
+        }
     }
-    return atmo_final;
+    
+    // L'indice ATMO final est le maximum des sous-indices
+    int atmoIndex = 1;
+    for (const auto& pair : subIndices) {
+        atmoIndex = max(atmoIndex, pair.second);
+    }
+
+    return atmoIndex;
 }
 
 bool Sensor::hasMeasurementAtTime(Timestamp timeStamp) const
 {
-    bool res = false;
-    auto it = measurements.begin();
-    for (int i = 0; i < measurements.size(); i += 4)
-    {
-        advance(it, i);
-        if (it->getTimeStamp() == timeStamp)
-        {
-            res = true;
-            break;
+    for (const auto& measurement : measurements) {
+        if (measurement.getTimeStamp() == timeStamp) {
+            return true;
         }
     }
-    return res;
+    return false;
 }
 
 string Sensor::getSensorID() const
@@ -69,17 +92,14 @@ string Sensor::getSensorID() const
 }
 
 vector<Timestamp> Sensor::getMeasurementTimestamps() const
-{ //!!!!!!!!!!!!!!!!!!!!! set et non list
-    set<Timestamp> liste_timestamps;
-    auto it = measurements.begin();
-    for (int i = 0; i < measurements.size(); ++i)
-    {
-        advance(it, i);
-        liste_timestamps.insert(it->getTimeStamp());
+{
+    set<Timestamp> uniqueTimestamps;
+    
+    for (const auto& measurement : measurements) {
+        uniqueTimestamps.insert(measurement.getTimeStamp());
     }
-
-    vector<Timestamp> liste_finale(liste_timestamps.begin(), liste_timestamps.end());
-    return liste_finale;
+    
+    return vector<Timestamp>(uniqueTimestamps.begin(), uniqueTimestamps.end());
 }
 
 void Sensor::addMeasurement(Measurement measurement)

@@ -23,6 +23,10 @@ string Attribute::getUnit() const {
     return unit;
 }
 
+string Attribute::getAttributeID() const {
+    return attributeID;
+}
+
 //------------------------------------------------- Surcharge d'opérateurs
 
 //-------------------------------------------- Constructeurs - destructeur
