@@ -86,9 +86,17 @@ int test4_useCasesManager()
 
     vector<pair<Sensor, double>> suspiciousSensors = useCasesManager->identifySuspiciousSensors();
     
-    if (!suspiciousSensors.empty()) {
-        cout << "Test4 failed: Suspicious sensors were found when there should be none." << endl;
-        cout << "Suspicious Sensors:" << endl;
+    if (suspiciousSensors.empty()) {
+        cout << "Test4 failed: No suspicious sensors were found." << endl;
+        delete useCasesManager;
+        return 1;
+    }
+    
+    if (suspiciousSensors[0].first.getSensorID() != "Sensor36") {
+        cout << "Test4 failed: First suspicious sensor is not Sensor36." << endl;
+        cout << "Expected: Sensor36" << endl;
+        cout << "Got: " << suspiciousSensors[0].first.getSensorID() << endl;
+        cout << "All suspicious sensors found:" << endl;
         for (const auto& pair : suspiciousSensors) {
             cout << "Sensor ID: " << pair.first.getSensorID() 
                  << ", Suspicion Score: " << pair.second << endl;

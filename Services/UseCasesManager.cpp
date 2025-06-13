@@ -206,16 +206,18 @@ vector<pair<Sensor, double>> UseCasesManager::identifySuspiciousSensors()
     return scoredSensors;
 }
 
-vector<Sensor> UseCasesManager::findSensorsWithinRadius(const Coordinates& centerCoords, double R){
-    set<Sensor> sensorsWithinRadius;
-    for(auto sensor : sensors){
-        if ((sensor.getCoordinates()->getLatitude()>=(centerCoords.getLatitude()-R)) && (sensor.getCoordinates()->getLatitude()<=(centerCoords.getLatitude()+R))&&(sensor.getCoordinates()->getLongitude()>=(centerCoords.getLongitude()-R))&&(sensor.getCoordinates()->getLongitude()<=(centerCoords.getLongitude()+R))){
-            sensorsWithinRadius.insert(sensor);
+vector<Sensor> UseCasesManager::findSensorsWithinRadius(const Coordinates& centerCoords, double R)
+{    
+    vector<Sensor> sensorsWithinRadius;
+    
+    for(const auto& sensor : sensors) {
+        double distance = Coordinates::distance(centerCoords, *sensor.getCoordinates());
+        if (distance <= R) {
+            sensorsWithinRadius.push_back(sensor);
         }
     }
-    vector<Sensor> liste_finale(sensorsWithinRadius.begin(), sensorsWithinRadius.end());
-    return liste_finale;
-
+    
+    return sensorsWithinRadius;
 }
 
 int UseCasesManager::ComputeAtmoIndexInArea(Coordinates centerCoords,float R, Timestamp timestamp){
@@ -223,6 +225,12 @@ int UseCasesManager::ComputeAtmoIndexInArea(Coordinates centerCoords,float R, Ti
 
     // Find all sensors in circle
     vector<Sensor> sensors = findSensorsWithinRadius(centerCoords, R);
+    cout << "Sensors found within radius " << R << " km of center (" 
+         << centerCoords.getLatitude() << ", " << centerCoords.getLongitude() << "):" << endl;
+    for (const auto& sensor : sensors) {
+        cout << sensor.getSensorID() << " ";
+    }
+    cout << endl;
 
     if (sensors.empty()){
         printf("No data available\n");
