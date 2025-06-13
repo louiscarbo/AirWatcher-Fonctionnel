@@ -12,6 +12,7 @@ using namespace std;
 #include <string>
 #include <ctime>
 #include <chrono>
+#include <limits>
 
 //------------------------------------------------------ Include personnel
 #include "Menu.h"
@@ -87,6 +88,9 @@ void Menu::displayMainMenu()
     cout << "6. Turn on/off performance tracking" << endl;
 }
 
+// Add this include at the top of Menu.cpp
+#include <limits>
+
 std::string Menu::getUserInput(const std::string &prompt)
 {
     #ifdef MAP
@@ -95,7 +99,14 @@ std::string Menu::getUserInput(const std::string &prompt)
     
     cout << prompt;
     std::string input;
-    cin >> input;
+    
+    // Only ignore if the previous operation was cin >>
+    if (cin.peek() == '\n') {
+        cin.ignore();
+    }
+    
+    getline(cin, input);
+    
     return input;
 }
 
