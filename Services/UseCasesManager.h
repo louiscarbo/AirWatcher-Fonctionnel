@@ -95,6 +95,8 @@ public:
 
     
     void loadData(bool verbose = false);
+    // Mode d'emploi :
+    //  Charge les données à partir des fichiers CSV.
 
     void setPerformanceTracking(bool enabled);
 

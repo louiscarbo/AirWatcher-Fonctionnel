@@ -60,15 +60,15 @@ int test2_CSVParser()
         return 1;
     } else {
         for (size_t i = 0; i < attributs.size(); ++i) {
-            if (// attributs[i].getAttributeID() != expectedID[i] ||
-                attributs[i].getUnit() != expectedUnit[i]
-                // ||attributs[i].getDescription() != expectedDescription[i]
+            if (attributs[i].getAttributeID() != expectedID[i] ||
+                attributs[i].getUnit() != expectedUnit[i] ||
+                attributs[i].getDescription() != expectedDescription[i]
                 ) {
                 cout << "Test2 failed: Attribute mismatch at index " << i << endl;
                 cout << "Expected: " << expectedID[i] << ", " << expectedUnit[i] << ", " << expectedDescription[i] << endl;
-                cout << "Got: " << "getAttributeID() non implémenté"// << attributs[i].getAttributeID() << ", " 
+                cout << "Got: " << attributs[i].getAttributeID() << ", " 
                      << attributs[i].getUnit() << ", "
-                     << "getDescription() non implémenté" // << attributs[i].getDescription()
+                     << attributs[i].getDescription()
                      << endl;
                 delete parser;
                 return 1;
@@ -106,7 +106,7 @@ int test3_CSVParser()
     return 0;
 }
 
-/*
+
 int test4_CSVParser()
 {
     CSVParser parser("Dataset/");
@@ -130,7 +130,7 @@ int test4_CSVParser()
 
     return 0;
 }
-*/
+
 
 int test5_CSVParser(){
     CSVParser * parser = new CSVParser("Dataset/");
@@ -142,16 +142,17 @@ int test5_CSVParser(){
         return 1;
     }else if (cleaners.at(0).getCoordinates() == nullptr) {
             cout << "Test5 failed: Coordinates is nullptr." << endl;
+            delete parser;
             return 1;
         
-    } else if (// cleaners.at(0).getCleanerID() != "Cleaner0" ||
+    } else if (cleaners.at(0).getCleanerID() != "Cleaner0" ||
                cleaners.at(0).getCoordinates()->getLatitude() != 45.333333 ||
                cleaners.at(0).getCoordinates()->getLongitude() != 1.333333 ||
                cleaners.at(0).getTimestamp_start() != parseTimestamp("2019-02-01 12:00:00") ||
                cleaners.at(0).getTimestamp_stop() != parseTimestamp("2019-03-01 00:00:00")) {
         cout << "Test5 failed: First cleaner error" << endl;
         cout << "Expected: Cleaner0, Coordinates(45.333333, 1.333333), 2019-02-01 12:00:00, 2019-03-01 00:00:00" << endl;
-        cout << "Got: " << /*cleaners.at(0).getCleanerID()*/ "getCleanerID() non implémenté" << ", Coordinates("
+        cout << "Got: " << cleaners.at(0).getCleanerID() << ", Coordinates("
              << cleaners.at(0).getCoordinates()->getLatitude() << ", "
              << cleaners.at(0).getCoordinates()->getLongitude() << "), "
              << std::chrono::system_clock::to_time_t(cleaners.at(0).getTimestamp_start()) << ", "
@@ -173,14 +174,14 @@ int test6_CSVParser()
         cout << "Test6 failed: No private individuals loaded." << endl;
         delete parser;
         return 1;
-    } else if (//individuals.at(0).getUserName() != "User0" ||
-               //individuals.at(0).getSensorsIDs().empty() ||
-               //individuals.at(0).getSensorsIDs().at(0) != "Sensor70"
-               individuals.at(0).getPoints() != 0 ){
+    } else if (individuals.at(1).getUserName() != "User0" ||
+               individuals.at(1).getSensorsIDs().empty() ||
+               individuals.at(1).getSensorsIDs().at(0) != "Sensor70" ||
+               individuals.at(1).getPoints() != 0 ){
         cout << "Test6 failed: First private individual error" << endl;
         cout << "Expected: User0, Sensor70, 0" << endl;
-        cout << "Got: " << /*individuals.at(0).getUserName()*/ "getUserName() pas encore implémenté" << ", "
-             << /*(individuals.at(0).getSensorsIDs().empty() ? "No sensors" : individuals.at(0).getSensorsIDs().at(0))*/ "getSensorsIDs() pas encore implémenté" << ","
+        cout << "Got: " << individuals.at(0).getUserName() << ", "
+             << (individuals.at(0).getSensorsIDs().empty() ? "No sensors" : individuals.at(0).getSensorsIDs().at(0)) << ", "
              << individuals.at(0).getPoints()
              << endl;
         delete parser;
@@ -223,7 +224,7 @@ int testCSVParser()
     resultat += test1_CSVParser();
     resultat += test2_CSVParser();
     resultat += test3_CSVParser();
-    //resultat += test4(); // Commenté car loadMeasurements() n'est pas fini
+    resultat += test4_CSVParser();
     resultat += test5_CSVParser();
     resultat += test6_CSVParser();
     resultat += test7_CSVParser();

@@ -22,8 +22,33 @@ int test1_useCasesManager()
 {
     UseCasesManager * useCasesManager = new UseCasesManager();
     useCasesManager->loadData();
-    delete useCasesManager;
+    if(useCasesManager->getAttributes().empty()) {
+        cout << "Test1 failed: No attributes loaded." << endl;
+        delete useCasesManager;
+        return 1;
+    } else if (useCasesManager->getCleaners().empty()) {
+        cout << "Test1 failed: No cleaners loaded." << endl;
+        delete useCasesManager;
+        return 1;
+    } else if (useCasesManager->getSensors().empty()) {
+        cout << "Test1 failed: No sensors loaded." << endl;
+        delete useCasesManager;
+        return 1;
+    } else if (useCasesManager->getMeasurements().empty()) {
+        cout << "Test1 failed: No measurements loaded." << endl;
+        delete useCasesManager;
+        return 1;
+    } else if (useCasesManager->getUsers().empty()) {
+        cout << "Test1 failed: No private individuals loaded." << endl;
+        delete useCasesManager;
+        return 1;
+    } else if (useCasesManager->getProviders().empty()) {
+        cout << "Test1 failed: No air cleaner providers loaded." << endl;
+        delete useCasesManager;
+        return 1;
+    }
 
+    delete useCasesManager;
     return 0;
 }
 
