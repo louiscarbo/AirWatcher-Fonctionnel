@@ -19,6 +19,7 @@ using namespace std;
 //------------------------------------------------------ Include personnel
 #include "../Services/UseCasesManager.h"
 #include "../Data/CSVParser.h"
+#include <unordered_map>
 
 
 //------------------------------------------------------------- Constantes

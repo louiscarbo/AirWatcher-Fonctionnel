@@ -194,6 +194,9 @@ void Menu::calculateMeanAirQualityArea()
     std::string tsInput = getUserInput("Enter timestamp (YYYY-MM-DD HH:MM:SS): ");
     Timestamp ts = parseTimestamp(tsInput);
 
+    std::time_t tt = std::chrono::system_clock::to_time_t(ts);
+    std::cout << "Parsed timestamp : " << std::ctime(&tt);
+
     // Calcul avec le Manager
     int result = manager.ComputeAtmoIndexInArea(center, radius, ts);
 
