@@ -28,6 +28,8 @@ using namespace std;
 //----------------------------------------------------- Méthodes publiques
 vector<pair<Sensor, double>> UseCasesManager::identifySuspiciousSensors()
 {
+    auto start = chrono::high_resolution_clock::now();
+
     const int LAST_N = 30;                   
     const int RANGE_MIN = 0;                 
     const int RANGE_MAX = 100;                
@@ -190,6 +192,15 @@ vector<pair<Sensor, double>> UseCasesManager::identifySuspiciousSensors()
          [](const pair<Sensor, double>& a, const pair<Sensor, double>& b) {
              return a.second > b.second;
          });
+
+
+    // Track performance if enabled
+    if (trackPerformance) {
+        auto end = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+        cout << "[PERFORMANCE] identifySuspiciousSensors executed in " << duration.count() << " ms" << endl;
+    }
+
     
     return scoredSensors;
 }
@@ -207,6 +218,8 @@ vector<Sensor> UseCasesManager::findSensorsWithinRadius(const Coordinates& cente
 }
 
 int UseCasesManager::ComputeAtmoIndexInArea(Coordinates centerCoords,float R, Timestamp timestamp){
+    auto start = chrono::high_resolution_clock::now();
+
     // Find all sensors in circle
     vector<Sensor> sensors = findSensorsWithinRadius(centerCoords, R);
 
@@ -229,6 +242,14 @@ int UseCasesManager::ComputeAtmoIndexInArea(Coordinates centerCoords,float R, Ti
             totalWeight += weight;
         }
     }
+
+    // Track performance if enabled
+    if (trackPerformance) {
+        auto end = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+        cout << "[PERFORMANCE] findSensorsWithinRadius executed in " << duration.count() << " ms" << endl;
+    }
+
     // Return weighted average
     if(totalWeight==0){
         printf("No data at timestamp\n");
@@ -242,36 +263,36 @@ int UseCasesManager::ComputeAtmoIndexInArea(Coordinates centerCoords,float R, Ti
 void UseCasesManager::loadData(bool verbose) {
 
     if (verbose) {
-        cout << "\nChargement des données depuis les fichiers de données." << endl;
+        cout << "\nLoading data from CSV files." << endl;
     }
 
     if (verbose) {
-        cout << "Chargement des attributs...    ";
+        cout << "Loading attributes...    ";
     }
     attributes   = parser.loadAttributes();
     if (verbose) {
-        cout << "Terminé : " << attributes.size() << " attributs chargés\n";
+        cout << "Finished: " << attributes.size() << " attributes loaded\n";
     }
 
     if (verbose) {
-        cout << "Chargement des capteurs...     ";
+        cout << "Loading sensors...       ";
     }
     sensors      = parser.loadSensors();
     if (verbose) {
-        cout << "Terminé : " << sensors.size() << " capteurs chargés\n";
+        cout << "Finished: " << sensors.size() << " sensors loaded\n";
     }
 
     if (verbose) {
-        cout << "Chargement des mesures...      ";
+        cout << "Loading measurements...  ";
     }
     measurements = parser.loadMeasurements();
     if (verbose) {
-        cout << "Terminé : " << measurements.size() << " mesures chargées\n";
+        cout << "Finished: " << measurements.size() << " measurements loaded\n";
     }
 
-    // Association des mesures aux capteurs
+    // Associating measurements with sensors
     if (verbose) {
-        cout << "Association des mesures aux capteurs... ";
+        cout << "Associating measurements with sensors... ";
     }
     for (const auto& measurement : measurements) {
         for (auto& sensor : sensors) {
@@ -282,36 +303,45 @@ void UseCasesManager::loadData(bool verbose) {
         }
     }
     if (verbose) {
-        cout << "Terminé\n";
+        cout << "Done\n";
     }
 
     if (verbose) {
-        cout << "Chargement des nettoyeurs...   ";
+        cout << "Loading cleaners...      ";
     }
     cleaners     = parser.loadCleaners();
     if (verbose) {
-        cout << "Terminé : " << cleaners.size() << " nettoyeurs chargés\n";
+        cout << "Finished: " << cleaners.size() << " cleaners loaded\n";
     }
 
     if (verbose) {
-        cout << "Chargement des utilisateurs... ";
+        cout << "Loading users...         ";
     }
     users        = parser.loadPrivateIndividuals();
     if (verbose) {
-        cout << "Terminé : " << users.size() << " utilisateurs chargés\n";
+        cout << "Finished: " << users.size() << " users loaded\n";
     }
 
     if (verbose) {
-        cout << "Chargement des fournisseurs... ";
+        cout << "Loading providers...     ";
     }
     providers    = parser.loadAirCleanerProviders();
     if (verbose) {
-        cout << "Terminé : " << providers.size() << " fournisseurs chargés\n";
+        cout << "Finished: " << providers.size() << " providers loaded\n";
     }
 
     if (verbose) {
-        cout << "Chargement des données terminé.\n" << endl;
-    }}
+        cout << "Loading data completed.\n" << endl;
+    }
+}
+
+void UseCasesManager::setPerformanceTracking(bool enabled) {
+    trackPerformance = enabled;
+}
+
+bool UseCasesManager::isPerformanceTrackingEnabled() const {
+    return trackPerformance;
+}
 
 //------------------------------------------------- Surcharge d'opérateurs
 

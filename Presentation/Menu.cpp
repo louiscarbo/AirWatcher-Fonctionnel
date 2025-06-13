@@ -40,8 +40,8 @@ void Menu::displayProfileSelectionMenu()
     cout << "1. Private Individual" << endl;
     cout << "2. Government Agency" << endl;
     cout << "3. Air Cleaner Provider" << endl;
-    cout << "Veuillez sélectionner un profil (1-3): ";
-    
+    cout << "Please select a profile (1-3): ";
+
     int choice;
     bool validChoice = false;
     
@@ -83,6 +83,8 @@ void Menu::displayMainMenu()
     {
         cout << "5. Identify malfunctioning or malicious sensors" << endl;
     }
+
+    cout << "6. Turn on/off performance tracking" << endl;
 }
 
 std::string Menu::getUserInput(const std::string &prompt)
@@ -150,6 +152,13 @@ void Menu::selectFunctionality(int option)
                 cout << "Invalid Option. Please try again." << endl;
             }
             break;
+        case 6:
+        {
+            bool currentState = manager.isPerformanceTrackingEnabled();
+            manager.setPerformanceTracking(!currentState);
+            cout << "Performance tracking is now " << (currentState ? "disabled." : "enabled.") << endl;
+            break;
+        }
         default:
             cout << "Invalid Option. Please try again." << endl;
             break;
@@ -214,6 +223,7 @@ void Menu::identifyMalfunctioningSensors()
     
     std::cout << "\n--- Identify Malfunctioning or Malicious Sensors ---\n";
 
+    
     auto scored = manager.identifySuspiciousSensors();
 
     if (scored.empty()) {

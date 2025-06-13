@@ -30,7 +30,7 @@ int main() {
 
         // Afficher le menu principal adapté au rôle utilisateur
         menu.displayMainMenu();
-        std::string optionStr = menu.getUserInput("Veuillez sélectionner une option (ou 'q' pour quitter): ");
+        std::string optionStr = menu.getUserInput("Please select an option (1-5) or 'q' to quit: ");
         cout << "\n\n" << endl;
 
         if (optionStr == "q") {

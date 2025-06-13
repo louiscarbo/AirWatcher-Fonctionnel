@@ -64,6 +64,10 @@ public:
 
     
     void loadData(bool verbose = false);
+
+    void setPerformanceTracking(bool enabled);
+
+    bool isPerformanceTrackingEnabled() const;
     
 //------------------------------------------------- Surcharge d'opérateurs
 
