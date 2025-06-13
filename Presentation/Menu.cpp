@@ -7,12 +7,12 @@
 //---------------------------------------------------------------- INCLUDE
 
 //-------------------------------------------------------- Include système
-using namespace std;
 #include <iostream>
 #include <string>
 #include <ctime>
 #include <chrono>
 #include <limits>
+using namespace std;
 
 //------------------------------------------------------ Include personnel
 #include "Menu.h"

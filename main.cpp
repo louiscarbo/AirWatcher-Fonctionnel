@@ -10,9 +10,6 @@ int main() {
     // Initialiser les données et les cas d'utilisation
     UseCasesManager manager;
     manager.loadData(true); // Ou une méthode similaire ?
-
-    // Exécuter les tests
-    // runTests();
     
     // Initialiser le menu avec le manager
     Menu menu(manager);
@@ -42,6 +39,9 @@ int main() {
 
         cout << "\n\n" << endl;
     }
+
+    // Exécuter les tests
+    runTests();
 
     cout << "Exiting the application. Goodbye!" << endl;
 

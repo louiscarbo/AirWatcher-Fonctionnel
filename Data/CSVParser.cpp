@@ -7,7 +7,6 @@
 //---------------------------------------------------------------- INCLUDE
 
 //-------------------------------------------------------- Include système
-using namespace std;
 #include <iostream>
 #include <fstream>
 #include <iostream>
@@ -15,6 +14,7 @@ using namespace std;
 #include <vector>
 #include <string>
 #include <unordered_map>
+using namespace std;
 
 //------------------------------------------------------ Include personnel
 #include "CSVParser.h"
@@ -83,7 +83,7 @@ vector<Sensor> CSVParser::loadSensors (){
                     stod(cols[2])
                 }
             );
-        sensors.push_back(move(s));
+        sensors.push_back(std::move(s));
     }
     return sensors; 
 }
@@ -152,7 +152,7 @@ vector<Cleaner> CSVParser::loadCleaners (){
             stod(cols[1]),
             stod(cols[2])
         );
-        cleaners.push_back(move(c));
+        cleaners.push_back(std::move(c));
     }
     return cleaners; 
 }

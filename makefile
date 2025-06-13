@@ -2,7 +2,7 @@
 # CONFIGURATION
 # --------------------------
 CXX      = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -I.
+CXXFLAGS = -std=c++17 -I. # -Wall -Wextra
 
 SRC_DIRS = Data Model Services Presentation
 BUILD_DIR = bin
