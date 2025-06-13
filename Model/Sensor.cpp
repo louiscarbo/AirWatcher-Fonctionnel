@@ -20,9 +20,18 @@ int Sensor::calculateMeanAtmoIndex(Timestamp timeStamp)
 {
     // Recherche toutes les mesures pour ce timestamp
     vector<Measurement> measurementsAtTime;
+
+    std::time_t target_time_t = std::chrono::system_clock::to_time_t(timeStamp);
+    std::tm target_tm = *std::localtime(&target_time_t);
     
     for (const auto& measurement : measurements) {
-        if (measurement.getTimeStamp() == timeStamp) {
+        std::time_t m_time_t = std::chrono::system_clock::to_time_t(measurement.getTimeStamp());
+        std::tm m_tm = *std::localtime(&m_time_t);
+
+        // Si la mesure est du même jour
+        if (m_tm.tm_year == target_tm.tm_year &&
+            m_tm.tm_mon  == target_tm.tm_mon &&
+            m_tm.tm_mday == target_tm.tm_mday) {
             measurementsAtTime.push_back(measurement);
         }
     }
@@ -72,7 +81,9 @@ int Sensor::calculateMeanAtmoIndex(Timestamp timeStamp)
 
     return atmoIndex;
 }
+    
 
+/*
 bool Sensor::hasMeasurementAtTime(Timestamp timeStamp) const
 {
     for (const auto& measurement : measurements) {
@@ -80,6 +91,26 @@ bool Sensor::hasMeasurementAtTime(Timestamp timeStamp) const
             return true;
         }
     }
+    return false;
+}*/
+bool Sensor::hasMeasurementAtTime(Timestamp timeStamp) const
+{
+    std::time_t target_time_t = std::chrono::system_clock::to_time_t(timeStamp);
+    std::tm target_tm = *std::localtime(&target_time_t);
+
+    for (const auto& m : measurements)
+    {
+        std::time_t m_time_t = std::chrono::system_clock::to_time_t(m.getTimeStamp());
+        std::tm m_tm = *std::localtime(&m_time_t);
+
+        if (m_tm.tm_year == target_tm.tm_year &&
+            m_tm.tm_mon  == target_tm.tm_mon &&
+            m_tm.tm_mday == target_tm.tm_mday)
+        {
+            return true;
+        }
+    }
+
     return false;
 }
 

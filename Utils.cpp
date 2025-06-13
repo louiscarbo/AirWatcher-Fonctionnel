@@ -1,35 +1,38 @@
 #if ! defined ( Utils )
 #define Utils
-
 using Timestamp = std::chrono::time_point<std::chrono::system_clock>;
 #include <string>
+#include <iomanip>   // pour std::get_time
+#include <sstream>
+#include <chrono>
+#include <ctime>
+#include <iostream>
 using namespace std;
 
 static Timestamp parseTimestamp(const std::string &input)
 {
-    // attend le format "YYYY-MM-DD HH:MM:SS" (longueur 19)
-    if (input.size() != 19
-     || input[4] != '-' || input[7] != '-'
-     || input[10] != ' ' || input[13] != ':' || input[16] != ':')
-    {
-        return Timestamp{};
-    }
-
     std::tm tm = {};
-    try {
-        tm.tm_year = std::stoi(input.substr(0,4)) - 1900;
-        tm.tm_mon  = std::stoi(input.substr(5,2)) - 1;
-        tm.tm_mday = std::stoi(input.substr(8,2));
-        tm.tm_hour = std::stoi(input.substr(11,2));
-        tm.tm_min  = std::stoi(input.substr(14,2));
-        tm.tm_sec  = std::stoi(input.substr(17,2));
-    } catch (...) {
+    std::istringstream ss(input);
+    ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+
+    if (ss.fail()) {
+        std::cerr << "Erreur parsing : " << input << std::endl;
         return Timestamp{};
     }
 
-    // mktime assume tm en heure locale
-    std::time_t tt = std::mktime(&tm);
+    
+    // mktime suppose heure locale, donc pour garder l'heure exacte
+    // on peut désactiver l'ajustement DST automatique
+    tm.tm_isdst = 0; // 0 = ne pas considérer l'heure d'été
+
+    std::time_t tt = std::mktime(&tm);// mktime assume tm en heure locale
+    if (tt == -1) {
+        std::cerr << "Erreur mktime : " << input << std::endl;
+        return Timestamp{};
+    }
+
     return std::chrono::system_clock::from_time_t(tt);
 }
+
 
 #endif // Utils
