@@ -220,13 +220,13 @@ int testCSVParser()
 {
     cout << "Running CSVParser tests..." << endl;
     int resultat = 0;
-    //resultat += test1_CSVParser();
-    //resultat += test2_CSVParser();
-    //resultat += test3_CSVParser();
+    resultat += test1_CSVParser();
+    resultat += test2_CSVParser();
+    resultat += test3_CSVParser();
     //resultat += test4(); // Commenté car loadMeasurements() n'est pas fini
     resultat += test5_CSVParser();
-    //resultat += test6_CSVParser();
-    //resultat += test7_CSVParser();
+    resultat += test6_CSVParser();
+    resultat += test7_CSVParser();
     if (resultat == 0) {
         cout << "All tests passed successfully!" << endl << endl;
     } else {

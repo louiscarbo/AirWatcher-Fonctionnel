@@ -33,7 +33,7 @@ int test2_useCasesManager()
     useCasesManager->loadData();
 
     Coordinates centerCoords(44.0, -1.0);
-    float R = 5.0; // 5 km radius
+    float R = 0.8; // 800 m radius
     Timestamp timestamp = parseTimestamp("2019-01-01 12:00:00");
 
     int atmoIndex = useCasesManager->ComputeAtmoIndexInArea(centerCoords, R, timestamp);

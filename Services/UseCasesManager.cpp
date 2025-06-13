@@ -49,21 +49,22 @@ vector<pair<Sensor, double>> UseCasesManager::identifySuspiciousSensors()
 
     cout << "Identifying suspicious sensors..." << endl;
 
-    // OPTIMIZATION 1: Pre-compute all neighbors for all sensors
+    // OPTIMIZATION 1: Pre-compute all neighbors for all sensors using existing method
     unordered_map<string, vector<string>> neighborMap;
-    for (int i = 0; i < allSensors.size(); i++) {
-        for (int j = 0; j < allSensors.size(); j++) {
-            if (i != j) {
-                const Coordinates* coord1 = allSensors[i].getCoordinates();
-                const Coordinates* coord2 = allSensors[j].getCoordinates();
-                
-                double distance = Coordinates::distance(*coord1, *coord2);
-                
-                if (distance <= NEIGHBOR_RADIUS_KM) {
-                    neighborMap[allSensors[i].getSensorID()].push_back(allSensors[j].getSensorID());
-                }
+    for (const auto& sensor : allSensors) {
+        const Coordinates* sensorCoords = sensor.getCoordinates();
+        
+        // Find all sensors within radius using existing method
+        vector<Sensor> neighborsWithinRadius = findSensorsWithinRadius(*sensorCoords, NEIGHBOR_RADIUS_KM);
+        
+        // Extract neighbor IDs (excluding the sensor itself)
+        vector<string> neighborIds;
+        for (const auto& neighbor : neighborsWithinRadius) {
+            if (neighbor.getSensorID() != sensor.getSensorID()) {
+                neighborIds.push_back(neighbor.getSensorID());
             }
         }
+        neighborMap[sensor.getSensorID()] = neighborIds;
     }
 
     // OPTIMIZATION 2: Create sensor lookup map
@@ -72,6 +73,7 @@ vector<pair<Sensor, double>> UseCasesManager::identifySuspiciousSensors()
         sensorLookup[sensor.getSensorID()] = &sensor;
     }
 
+    // Iterate through each sensor and calculate scores
     int currentSensor = 0;
     for (auto& sensor : allSensors) {
         currentSensor++;
@@ -136,7 +138,7 @@ vector<pair<Sensor, double>> UseCasesManager::identifySuspiciousSensors()
             }
             double rateSpike = static_cast<double>(spikes) / max(1, (int)changes.size());
 
-            // CHECK 3 - OPTIMIZED Local inconsistency
+            // CHECK 3 - Local inconsistency
             vector<double> deviations;
             const vector<string>& neighborIds = neighborMap[sensor.getSensorID()];
             
