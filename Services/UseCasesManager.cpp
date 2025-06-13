@@ -27,6 +27,49 @@ using namespace std;
 //----------------------------------------------------------------- PUBLIC
 
 //----------------------------------------------------- Méthodes publiques
+
+vector<Attribute> UseCasesManager::getAttributes() const
+// Mode d'emploi :
+//  Renvoie la liste de tous les attributs.
+{
+    return attributes;
+}
+
+vector<Sensor> UseCasesManager::getSensors() const
+// Mode d'emploi :
+//  Renvoie la liste de tous les capteurs.
+{
+    return sensors;
+}
+
+vector<Measurement> UseCasesManager::getMeasurements() const
+// Mode d'emploi :
+//  Renvoie la liste de toutes les mesures.
+{
+    return measurements;
+}
+
+vector<Cleaner> UseCasesManager::getCleaners() const
+// Mode d'emploi :
+//  Renvoie la liste de tous les cleaners.
+{
+    return cleaners;
+}
+
+vector<PrivateIndividual> UseCasesManager::getUsers() const
+// Mode d'emploi :
+//  Renvoie la liste de tous les utilisateurs privés.
+{
+    return users;
+}
+
+vector<AirCleanerProvider> UseCasesManager::getProviders() const
+// Mode d'emploi :
+//  Renvoie la liste de tous les fournisseurs de purificateurs d'air.
+{
+    return providers;
+}
+
 vector<pair<Sensor, double>> UseCasesManager::identifySuspiciousSensors()
 {
     auto start = chrono::high_resolution_clock::now();

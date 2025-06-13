@@ -27,6 +27,11 @@ string Attribute::getAttributeID() const {
     return attributeID;
 }
 
+string Attribute::getDescription() const {
+    return description;
+}
+
+
 //------------------------------------------------- Surcharge d'opérateurs
 
 //-------------------------------------------- Constructeurs - destructeur

@@ -23,6 +23,10 @@ using namespace std;
 
 //----------------------------------------------------- Méthodes publiques
 
+string Cleaner::getCleanerID() const {
+    return cleanerID;
+}
+
 Timestamp Cleaner::getTimestamp_start() const {
     return timestamp_start;
 }

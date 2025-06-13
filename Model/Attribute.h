@@ -31,6 +31,11 @@ class Attribute {
 
         string getAttributeID() const;
 
+        string getDescription() const;
+        // Mode d'emploi :
+        // Retourne la description de l'attribut.
+        // Contrat :
+
         //------------------------------------------------- Surcharge d'opérateurs
 
         //-------------------------------------------- Constructeurs - destructeur

@@ -67,6 +67,16 @@ public:
     // Mode d'emploi :
     //  Renvoie l'identifiant du capteur.
 
+    list<Measurement> getMeasurements() const;
+    // Mode d'emploi :
+    //  Renvoie la liste des mesures du capteur.
+    // Contrat :
+
+    PrivateIndividual * getPrivateIndividual() const;
+    // Mode d'emploi :
+    //  Renvoie le propriétaire privé du capteur.
+    // Contrat :
+
 //------------------------------------------------- Surcharge d'opérateurs
     bool operator<(const Sensor & other) const {
         return sensorID < other.sensorID;

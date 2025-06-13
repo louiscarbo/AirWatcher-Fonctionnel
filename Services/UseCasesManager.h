@@ -40,6 +40,37 @@ class UseCasesManager
 
 public:
 //----------------------------------------------------- Méthodes publiques    
+    
+    vector<Attribute> getAttributes() const;
+    // Mode d'emploi :
+    //  Renvoie la liste de tous les attributs.
+    // Contrat :
+
+    vector<Sensor> getSensors() const;
+    // Mode d'emploi :
+    //  Renvoie la liste de tous les capteurs.
+    // Contrat :
+
+    vector<Measurement> getMeasurements() const;
+    // Mode d'emploi :
+    //  Renvoie la liste de toutes les mesures.
+    // Contrat :
+
+    vector<Cleaner> getCleaners() const;
+    // Mode d'emploi :
+    //  Renvoie la liste de tous les cleaners.
+    // Contrat :
+
+    vector<PrivateIndividual> getUsers() const;
+    // Mode d'emploi :
+    //  Renvoie la liste de tous les utilisateurs privés.
+    // Contrat :
+
+    vector<AirCleanerProvider> getProviders() const;
+    // Mode d'emploi :
+    //  Renvoie la liste de tous les fournisseurs de purificateurs d'air.
+    // Contrat :
+
     vector<pair<Sensor, double>> identifySuspiciousSensors();
     // Mode d'emploi :
     //  Appeler cette méthode pour identifier les capteurs suspicieux

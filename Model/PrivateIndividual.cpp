@@ -27,6 +27,22 @@ int PrivateIndividual::getPoints() const {
     return points;
 }
 
+int PrivateIndividual::getIdUser() const {
+    return idUser;
+}
+
+string PrivateIndividual::getUserName() const {
+    return userName;
+}
+
+bool PrivateIndividual::getIsReliable() const {
+    return isReliable;
+}
+
+vector<string> PrivateIndividual::getSensorsIDs() const {
+    return sensorsIDs;
+}
+
 void PrivateIndividual::AddPoints(int delta) {
     points += delta;
 }
